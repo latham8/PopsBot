@@ -1,16 +1,13 @@
 from datetime import datetime, time
 
+from binance.client import Client
 import discord
 from discord.ext import commands
 from tokens import *
 
-## Production Token - Do not use for Development
-##token = 'ODQzNjQ0MzkxMzY0ODg2NTM4.YKG3EQ.SyaBwtvx177TD9Xw9YLPGaohdF4'
-##token = 'ODQzODk3Mjc4MDg2NjQzNzIy.YKKilQ.8Z0TySXiS8o6ZRT-Mj004SEaSWE'
-
 
 client = commands.Bot(command_prefix = '.')
-version = '1.2.3'
+version = '1.2.7'
 
 @client.event
 async def on_ready():
@@ -33,7 +30,12 @@ async def pops(cxt, ticker, pe, pt, sl, lev, *, comments=None):
 
     now = datetime.now() ## For time in footer
     time = now.strftime("%I:%M:%S %p") ## For time in footer
-    embedVar = discord.Embed(title="**Pops Crypto Callout**", color=0x00FF00)
+
+    ## Binance API stuff ##
+    binance = Client(binance_key, binance_secret)
+    message = await cxt.send('@everyone')
+
+    embedVar = discord.Embed(title="**Pops Crypto**", color=0x00FF00)
 # Image at the bottom - using thumbnail instead    embedVar.set_image(url="https://cdn.discordapp.com/emojis/839112040681177118.png?v=1")
     embedVar.set_thumbnail(url="https://cdn.discordapp.com/emojis/839112040681177118.png?v=1")
     embedVar.insert_field_at(index=(0),name='Ticker', value=ticker.upper(), inline=False)
@@ -42,13 +44,19 @@ async def pops(cxt, ticker, pe, pt, sl, lev, *, comments=None):
     embedVar.add_field(name=f':x: Stop Loss - {sl}', value='\n\u200b', inline=False)
     embedVar.add_field(name=f':arrow_double_up: Leverage - {lev}', value='\u200b', inline=False)
     embedVar.add_field(name='Comments', value=comments, inline=False)
+## SAVE FOR ANOTHER TIME \\ IT GIVES LIVE PRICE AT TIME OF ALERT    embedVar.add_field(name='Current Price', value=binance.get_symbol_ticker(symbol=ticker))
     embedVar.set_footer(text=f"- Latham.xyz - PopsBot v{version} - {time}")
     await cxt.channel.send(embed=embedVar)
     await cxt.message.delete()
+
+## POPS COMMENT SECTION ##
 @client.command(pass_context=True)
-async def popscomment(cxt, comment):
+async def popscomment(cxt, *, comment):
+    message = await cxt.send('@everyone')
     now = datetime.now() ## For time in footer
     time = now.strftime("%I:%M:%S %p") ## For time in footer
+
+
 
     embedVar = discord.Embed(title="Pop's Crypto", color=0xFFA500)
     embedVar.set_thumbnail(url="https://cdn.discordapp.com/emojis/839112040681177118.png?v=1")
